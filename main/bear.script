@@ -1,0 +1,13 @@
+function init(self)
+	go.set("#sprite", "color_id", vmath.vector4(0)) -- at first turn off the post-process
+
+	timer.delay(1, true, function() -- every second
+
+		go.set("#sprite", "color_id", vmath.vector4(1)) --blink 
+
+		timer.delay(0.1, false, function()  --and after 0.1 sec
+			go.set("#sprite", "color_id", vmath.vector4(0))  -- turn of the post-process
+		end)
+
+	end)
+end

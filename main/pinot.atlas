@@ -1,0 +1,439 @@
+images {
+  image: "/assets/pinot/pinot-idle-down.png"
+}
+images {
+  image: "/assets/pinot/pinot-idle-side.png"
+}
+images {
+  image: "/assets/pinot/pinot-idle-up.png"
+}
+images {
+  image: "/assets/pinot/pinot-walk-side.png"
+}
+images {
+  image: "/assets/pinot/pinot-walk-up.png"
+}
+images {
+  image: "/assets/pinot/pinot-dive-down-1.png"
+}
+images {
+  image: "/assets/pinot/child-idle.png"
+}
+animations {
+  id: "pinot-walking-side"
+  images {
+    image: "/assets/pinot/pinot-walk-side.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-side.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+}
+animations {
+  id: "pinot-walking-down"
+  images {
+    image: "/assets/pinot/pinot-walk-down.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-down.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-walk-down-f.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-down-f.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+}
+animations {
+  id: "pinot-walking-up"
+  images {
+    image: "/assets/pinot/pinot-walk-up.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-up.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-walk-up-f.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-up-f.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 8
+}
+animations {
+  id: "pinot-dive-side"
+  images {
+    image: "/assets/pinot/pinot-dive-side-1.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-7.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-walk-side.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-walk-side.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-dive-up"
+  images {
+    image: "/assets/pinot/pinot-dive-up-1.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-7.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-up.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-up.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-dive-down"
+  images {
+    image: "/assets/pinot/pinot-dive-down-1.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-7.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-down.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-down.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-rise-side"
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-walk-side.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-walk-side.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-rise-up"
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-up.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-up.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-rise-down"
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-6.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-down.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-idle-down.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-slide-16-side"
+  images {
+    image: "/assets/pinot/pinot-dive-side-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 16
+}
+animations {
+  id: "pinot-slide-16-up"
+  images {
+    image: "/assets/pinot/pinot-dive-up-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 16
+}
+animations {
+  id: "pinot-slide-16-down"
+  images {
+    image: "/assets/pinot/pinot-dive-down-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 16
+}
+animations {
+  id: "pinot-slide-8-side"
+  images {
+    image: "/assets/pinot/pinot-dive-side-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-slide-8-up"
+  images {
+    image: "/assets/pinot/pinot-dive-up-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-slide-8-down"
+  images {
+    image: "/assets/pinot/pinot-dive-down-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-slide-4-side"
+  images {
+    image: "/assets/pinot/pinot-dive-side-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-side-5.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-slide-4-up"
+  images {
+    image: "/assets/pinot/pinot-dive-up-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-up-5.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-slide-4-down"
+  images {
+    image: "/assets/pinot/pinot-dive-down-4.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-dive-down-5.png"
+  }
+  fps: 16
+}
+animations {
+  id: "pinot-lunge-side"
+  images {
+    image: "/assets/pinot/pinot-lunge-side-1.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-side-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-side-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-side-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-side-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-side-1.png"
+  }
+  fps: 20
+}
+animations {
+  id: "pinot-lunge-up"
+  images {
+    image: "/assets/pinot/pinot-lunge-up-1.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-up-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-up-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-up-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-up-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-up-1.png"
+  }
+  fps: 20
+}
+animations {
+  id: "pinot-lunge-down"
+  images {
+    image: "/assets/pinot/pinot-lunge-down-1.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-down-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-down-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-down-3.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-down-2.png"
+  }
+  images {
+    image: "/assets/pinot/pinot-lunge-down-1.png"
+  }
+  fps: 20
+}
+extrude_borders: 1

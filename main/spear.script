@@ -1,0 +1,21 @@
+go.property("color", vmath.vector3())
+go.property("palette_material", resource.material("/main/effects/3color.material"))
+
+function init(self)
+	go.set(msg.url("#sprite"), "material", self.palette_material)
+	go.set(msg.url("#sprite"), "color_id", vmath.vector4(self.color.x, self.color.y, self.color.z, 0))
+	
+	if self.color then
+		print(self.color)
+		print(self.color.x)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("animation_done") then
+		msg.post("/map#main", "remove_url", {hash = msg.url()})
+		go.delete() 
+	elseif message_id == hash("kill") then
+		go.delete()
+	end
+end

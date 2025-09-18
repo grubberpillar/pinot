@@ -1,0 +1,38 @@
+images {
+  image: "/assets/nothing.png"
+}
+images {
+  image: "/assets/pinot/spear/spear-2.png"
+}
+animations {
+  id: "spear-attack"
+  images {
+    image: "/assets/nothing.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-1.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-2.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-3.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-4.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-5.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-6.png"
+  }
+  images {
+    image: "/assets/pinot/spear/spear-7.png"
+  }
+  images {
+    image: "/assets/nothing.png"
+  }
+  fps: 20
+}
+extrude_borders: 1

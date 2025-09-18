@@ -1,0 +1,76 @@
+local enemies = require "main.enemies"
+
+local function random_tile_pos()
+	local row = math.random(3,9)-1
+	local col = math.random(10)-1
+	local tile_pos = vmath.vector3()
+
+	tile_pos.x = row*16 + 8
+	tile_pos.y = col*16 + 8
+	tile_pos.z = (144-tile_pos.y)/144
+	return tile_pos
+end
+
+function pprint(tbl, indent) --imported method
+	indent = indent or 0
+	for k, v in pairs(tbl) do
+		local formatting = string.rep("  ", indent) .. tostring(k) .. ": "
+		if type(v) == "table" then
+			print(formatting)
+			pprint(v, indent + 1)
+		else
+			print(formatting .. tostring(v))
+		end
+	end
+end
+
+function init(self)
+	self.instances = {}
+	
+	self.scale = 5
+	msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
+	window.set_size(160*self.scale, 144*self.scale)
+	
+	
+	local id, enemy_pos
+
+	for i = 1,2 do
+		enemy_pos = random_tile_pos()
+		id = factory.create("#scarecrow-factory", enemy_pos)
+		
+		table.insert(enemies.list, {url = id, pos = enemy_pos})
+	end
+	
+	-- pprint(enemies.list)
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("add_url") then
+		table.insert(self.instances, {message.hash, message.type})
+	elseif message_id == hash("remove_url") then
+		for i, k in ipairs(self.instances) do
+			if k[1].path == message.hash.path then
+				table.remove(self.instances, i)
+				break
+			end
+			if i == #self.instances then
+				print("nothing removed (" .. tostring(message.hash) .. ")")
+			end
+		end
+	elseif message_id == hash("purge_instances") then
+		local spared_instances = {}
+		while #self.instances > #spared_instances do
+			for i, k in ipairs(self.instances) do
+				if not (message.spare and message.spare == k[2]) then
+					msg.post(k[1], "kill")
+					table.remove(self.instances, i)
+				else
+					table.insert(spared_instances, table.remove(self.instances, i))
+				end
+			end
+		end
+		for i, k in ipairs(spared_instances) do
+			table.insert(self.instances, spared_instances[i])
+		end
+	end
+end

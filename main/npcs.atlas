@@ -1,0 +1,73 @@
+images {
+  image: "/assets/bear.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/npcs/giupetto-idle.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/npcs/scarecrow-idle.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+images {
+  image: "/assets/particles/dust-large.png"
+  sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+}
+animations {
+  id: "scarecrow-shake"
+  images {
+    image: "/assets/npcs/scarecrow-shake-1.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-shake-2.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-shake-3.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-shake-4.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  images {
+    image: "/assets/npcs/scarecrow-idle.png"
+    sprite_trim_mode: SPRITE_TRIM_MODE_OFF
+  }
+  playback: PLAYBACK_ONCE_FORWARD
+  fps: 10
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+margin: 0
+extrude_borders: 2
+inner_padding: 0
+max_page_width: 0
+max_page_height: 0
+rename_patterns: ""

@@ -1,0 +1,50 @@
+go.property("palette_material", resource.material("/main/effects/3color.material"))
+
+function init(self)
+	self.color = vmath.vector4(13,10,0,0)
+	go.set("#sprite", "material", self.palette_material)
+	go.set("#sprite", "color_id", self.color)
+	local pos = go.get_position()
+	pos.z = ((144-pos.y)/144)
+	go.set_position(pos)
+	self.glowing = false
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("flash") then
+		sprite.play_flipbook("#sprite", "scarecrow-shake")
+		for i = 1,1 do
+			timer.delay(0.2*(i-1), false, function()
+				self.color.w = 1
+				self.color.y = 6
+				go.set("#sprite", "color_id", self.color)
+			end)
+			timer.delay(0.2*i-0.1, false, function()
+				self.color.w = 0
+				self.color.y = 10
+				go.set("#sprite", "color_id", self.color)
+			end)
+		end
+	elseif message_id == hash("glow") then
+		self.glowing = message.glowing
+		if message.glowing then
+			self.color = vmath.vector4(13,10,2,0)
+			timer.delay(0.1, false, function()
+				if self.glowing then
+					self.color = vmath.vector4(13,10,4,0)
+					go.set("#sprite", "color_id", self.color)
+				end
+			end)
+		else
+			self.color = vmath.vector4(13,10,0,0)
+		end
+		go.set("#sprite", "color_id", self.color)
+	elseif message_id == hash("collision_response") then
+		msg.post(".", "flash")
+		msg.post("#hurtbox", "disable")
+		timer.delay(0.3, false, function()
+			msg.post("#hurtbox", "enable")
+		end)
+		print(message.own_group)
+	end
+end

@@ -1,0 +1,686 @@
+go.property("palette_material", resource.material("/main/effects/3color.material"))
+local enemies = require "main.enemies"
+
+local function round_decimals(num, places)
+	return math.floor(num * (10^places) + 0.5) / (10^places)
+end
+
+local function round_decimals_vector(vec3, places)
+	local rounded_vec3 = vmath.vector3(round_decimals(vec3.x, places), round_decimals(vec3.y, places), vec3.z) 
+	return rounded_vec3
+end
+
+local function dist_to_player(self, enemy_pos)
+	local diff_vec = enemy_pos - self.pos
+	diff_vec.z = 0
+	return vmath.length(diff_vec)
+end
+
+local function get_angle(pos_start, pos_end)
+	local dist_vec = pos_end - pos_start
+	local rise = dist_vec.y
+	local run = dist_vec.x
+	local angle
+	
+	if run == 0 then
+		if rise > 0 then
+			angle = 90 
+		else
+			angle = 270
+		end
+	else
+		local slope = rise/run
+		angle = math.deg(math.atan(slope))
+		if run < 0 then
+			angle = angle + 180
+		end
+		if angle < 0 then
+			angle = angle + 360
+		end
+	end
+
+	return (450-angle)%360
+end
+
+local function angle_dir(angle, separations)
+	local dirs, angle_shift, dir_num
+	if separations == 8 then
+		dirs = {"n", "ne", "e", "se", "s", "sw", "w", "nw"}
+		angle_shift = (angle+22.5)%360
+		dir_num = math.floor(angle_shift/45)+1
+	elseif separations == 4 then
+		dirs = {"n", "e", "s", "w"}
+		angle_shift = (angle+45)%360
+		dir_num = math.floor(angle_shift/90)+1
+	end
+	return dirs[dir_num]
+end
+
+local function min_val(numlist)
+	local min = numlist[1]
+	local index = 1
+	for i = 2, #numlist do
+		if numlist[i] < min then
+			min = numlist[i]
+			index = i
+		end
+	end
+	return index
+end
+
+local function simple_int(num)
+	if num > 0 then
+		return 1
+	elseif num < 0 then
+		return -1
+	else
+		return 0
+	end
+end
+
+local function check_input(self)
+	if math.abs(self.input.x) > 1 then
+		self.input.x = self.input.x/math.abs(math.abs(self.input.x))
+		print("x misaligned")
+	end
+	if math.abs(self.input.y) > 1 then
+		self.input.y = self.input.y/math.abs(math.abs(self.input.y))
+		print("y misaligned")
+	end
+end
+
+local function normalize_input(self)
+	if vmath.length(self.input) > 0 then
+		self.moving = true
+		self.dir = vmath.normalize(self.input)
+	end
+end
+
+local function vector_dir(vec3)
+	if vec3.x ~= 0 then
+		return "side"
+	elseif vec3.y > 0 then
+		return "up"
+	elseif vec3.y < 0 then
+		return "down"
+	end
+end
+
+local function closest_enemy(self)
+	if #enemies.list == 0 then
+		return nil
+	elseif #enemies.list == 1 then
+		return enemies.list[1]
+	end
+	
+	local dist_list = {}
+	for i,e in ipairs(enemies.list) do
+		table.insert(dist_list, dist_to_player(self, e.pos))
+	end
+
+	local mindex = min_val(dist_list)
+
+	return enemies.list[mindex]
+end
+
+local function enemy_hierarchy(self)
+	
+end
+
+local function set_animation(self)
+	if self.dir.x < 0 then
+		sprite.set_hflip("#sprite", true)
+	else
+		sprite.set_hflip("#sprite", false)
+	end
+
+	if self.dir.x ~= 0 then
+		sprite.play_flipbook("#sprite", "pinot-walking-side")
+	elseif self.dir.y > 0 then
+		sprite.play_flipbook("#sprite", "pinot-walking-up")
+	elseif self.dir.y < 0 then
+		sprite.play_flipbook("#sprite", "pinot-walking-down")
+	end
+end
+
+local function dive_end(self, anim)
+	sprite.play_flipbook("#sprite", anim, function() -- after animation
+		self.diving = false
+		if vmath.length(self.input) == 0 then
+			self.wasmoving = true
+		else
+			if (math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1) then
+				self.diagonal_start_pos = vmath.vector3(math.floor(self.pos.x), math.floor(self.pos.y), self.pos.z)
+			end 
+
+			set_animation(self)
+		end
+	end)
+end
+
+local function attack(self, dir)
+	self.attacking = true
+	sprite.play_flipbook("/spear#sprite-spear", "spear-attack")
+	local dir_convert = {n = "up", e = "side", s = "down", w = "side"}
+	
+	if dir == "w" then
+		go.set("/spear", "position", vmath.vector3(-15, -4, 0.001))
+		go.set_rotation(vmath.euler_to_quat(0,0,0), "/spear")
+		sprite.set_hflip("#sprite", true)
+		sprite.set_hflip("/spear#sprite-spear", true)
+	else
+		sprite.set_hflip("#sprite", false)
+		sprite.set_hflip("/spear#sprite-spear", false)
+		if dir	 == "n" then
+			go.set("/spear", "position", vmath.vector3(0, 15, 0.001))
+			go.set_rotation(vmath.euler_to_quat(0,0,90), "/spear")
+		elseif dir == "s" then
+			go.set("/spear", "position", vmath.vector3(0, -15, 0.001))
+			go.set_rotation(vmath.euler_to_quat(0,0,-90), "/spear")
+		elseif dir == "e" then
+			go.set("/spear", "position", vmath.vector3(15, -4, 0.001))
+			go.set_rotation(vmath.euler_to_quat(0,0,0), "/spear")
+		end
+	end
+	sprite.play_flipbook("#sprite", "pinot-lunge-"..dir_convert[dir], function()
+		self.attacking = false
+		if vmath.length(self.input) ~= 0 then
+			set_animation(self)
+		else
+			sprite.play_flipbook("#sprite", "pinot-idle-"..dir_convert[dir])
+		end
+	end)
+	
+	timer.delay(0.0625, false, function()
+		msg.post("/pinot#spear-"..dir, "enable")
+		timer.delay(self.atk_length, false, function()
+			msg.post("/pinot#spear-"..dir, "disable")
+		end)
+	end)
+end
+
+local function pinot_idle(self)
+	if self.diving or self.attacking then
+		return false
+	end
+	return true
+end
+
+function init(self)
+	msg.post("/pinot#hitbox", "disable")
+	msg.post("/pinot#hurtbox", "disable")
+	msg.post(".", "acquire_input_focus")
+	go.set("#sprite", "material", self.palette_material)
+	go.set("/spear#sprite-spear", "material", self.palette_material)
+	go.set("#sprite", "color_id", vmath.vector4(11,2,0,0))
+	go.set("/spear#sprite-spear", "color_id", vmath.vector4(11,2,0,0))
+	
+	local dirs = {"n", "e", "s", "w"}
+	for i,d in ipairs(dirs) do
+		msg.post("/pinot#spear-"..d, "disable")
+	end
+
+	self.input = vmath.vector3() --input values
+	self.dir = vmath.vector3(0, -1, 0)
+	self.tempdir = self.dir
+	self.speed = 60
+	self.shifting = false
+	
+	self.moving = false --movement values
+	self.wasmoving = self.moving
+
+	self.charms = {slide = true} --charm values
+
+	self.diving = false --div values
+	self.sliding = false
+	self.dive_state = 0
+	self.dive_time = 0 
+	self.slide_time = 0
+	self.dive_length = 2
+	self.slide_speed_diff = 0
+	self.dive_dir = nil
+	self.dive_speed = 100
+	self.extended_dive = false
+	self.slide_frames = 16
+
+	self.attacking = false --atk values
+	self.atk_length = 0.1
+	self.spear_color = vmath.vector3(11,2,0)
+	
+	self.slide_stop_constant = 500/(312.5/self.dive_speed) --slide values
+	self.slide_cont_constant = 500/(((self.dive_length-0.1875)*1000)/self.dive_speed)
+	self.dive_anim = {1,2,3,4,7,4,5,5,5,5,6,6} --unused atm
+
+	self.pos = go.get_position()
+	self.axis = "y"
+	self.diagonal_start_pos = self.pos
+	self.marked_pos = self.pos
+
+	self.target = nil
+	self.target_timer = 0
+	self.auto_target = true
+
+	-- local numlist = {4,2,5,6,2,5,6,3,2,3,1}
+	-- table.sort(numlist)
+	-- pprint(numlist)
+end
+
+function final(self)
+	msg.post(".", "release_input_focus")
+end
+
+-- local function slide_animation(self, dir)
+-- 	if self.sliding then
+-- 	else
+-- 		sprite.play_flipbook("#sprite", "pinot-slide-16-"..dir, function()
+-- 			sprite.play_flipbook("#sprite", "pinot-rise-"..dir, function()
+-- 				sprite.play_flipbook("#sprite", "pinot-idle-"..dir)
+-- 				self.diving = false
+-- 				if vmath.length(self.input) == 0 then
+-- 					self.wasmoving = true
+-- 				else
+-- 					if (math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1) then
+-- 						self.diagonal_start_pos = vmath.vector3(math.floor(self.pos.x), math.floor(self.pos.y), self.pos.z)
+-- 					end 
+-- 
+-- 					set_animation(self)
+-- 				end
+-- 			end)
+-- 		end)
+-- 	end
+-- end
+
+-- local function dive_animation(self, dir, frame)
+-- 	local newframe
+-- 	if frame < 13 then
+-- 		sprite.play_flipbook("#sprite", "pinot-dive-"..dir.."-"..self.dive_anim[frame])
+-- 	elseif frame < 15 then
+-- 		sprite.play_flipbook("#sprite", "pinot-idle-"..dir)
+-- 	end
+-- 
+-- 	if frame == 7 and self.sliding then 
+-- 		newframe = 6
+-- 		print("slide")
+-- 	else
+-- 		newframe = frame + 1
+-- 	end
+-- 
+-- 	if newframe < 15 then
+-- 		timer.delay(0.0625, false, function()
+-- 			dive_animation(self, dir, newframe)
+-- 		end)
+-- 	else
+-- 		print(self.dive_time)
+-- 		self.diving = false
+-- 		if vmath.length(self.input) == 0 then
+-- 			self.wasmoving = true
+-- 		else
+-- 			if (math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1) then
+-- 				self.diagonal_start_pos = vmath.vector3(math.floor(self.pos.x), math.floor(self.pos.y), self.pos.z)
+-- 			end 
+-- 
+-- 			set_animation(self)
+-- 		end
+-- 	end
+-- end
+
+function update(self, dt)
+	if self.moving or self.diving then
+		if self.diving then
+			local dive_time_prev = self.dive_time
+			self.dive_time = self.dive_time + dt
+			if self.dive_time <= 0.1875 then
+				if self.dive_state ~= 1 then
+					self.dive_state = 1
+				end
+				
+				self.pos = self.pos + self.dive_dir * self.dive_speed* dt
+			elseif self.dive_time <= self.dive_length then --coming to a stop
+				if self.dive_time >= 0.3125 and self.dive_state ~= 2 then
+					self.dive_state = 2
+					if self.sliding then
+						sprite.play_flipbook("#sprite", "pinot-slide-16-"..vector_dir(self.dive_dir))
+						self.extended_dive = true
+					end
+				end
+				
+				local spillover_dt = 0 --time skipped in frames that misses part of the first part of dash
+				if dive_time_prev < 0.1875 then --accounting for skipped time
+					-- print("spill")
+					spillover_dt = 0.1875-dive_time_prev
+					self.pos = self.pos + self.dive_dir * self.dive_speed* spillover_dt
+				end
+				
+				local start = self.dive_time-0.1875-dt+spillover_dt
+				local fin = self.dive_time-0.1875
+				local constant
+				if self.sliding then
+					constant = self.slide_cont_constant
+				else
+					constant = self.slide_stop_constant
+				end
+
+				local newpos = (self.dive_dir* ((-constant*(fin)^2 + (self.dive_speed-self.slide_speed_diff)*(fin) + self.slide_time*(constant*2)*(fin)) - (-constant*(start)^2 + (self.dive_speed-self.slide_speed_diff)*(start) + self.slide_time*(constant*2)*(start))))
+				self.pos = self.pos + newpos
+				-- if newpos.x <= 0 then
+					-- print(newpos.x)
+				-- end
+			else --comes to a stop
+				if self.dive_state ~= 3 then
+					self.dive_state = 3
+					if self.extended_dive then
+						dive_end(self, "pinot-rise-"..vector_dir(self.dive_dir))
+					end
+				end
+				
+				local spillover_dt --time skipped in frames that misses part of the slowdown
+				if dive_time_prev < 0.5 then --accounting for skipped time
+					-- print("spill")
+					spillover_dt = 0.5-dive_time_prev
+					local start = 0.5-0.1875-spillover_dt
+					local fin = 0.5-0.1875
+					
+					local constant
+					if self.sliding then
+						constant = self.slide_cont_constant
+					else
+						constant = self.slide_stop_constant
+					end
+					
+					local newpos = (self.dive_dir* ((-constant*(fin)^2 + (self.dive_speed-self.slide_speed_diff)*(fin) + self.slide_time*(constant*2)*(fin)) - (-constant*(start)^2 + (self.dive_speed-self.slide_speed_diff)*(start) + self.slide_time*(constant*2)*(start))))
+					self.pos = self.pos + newpos
+				end
+			end
+		elseif not self.attacking then
+			self.pos = self.pos + self.dir * self.speed* dt
+		end
+		local pos_sharp = vmath.vector3(0,0,1)
+		
+		pos_sharp.x = math.floor(self.pos.x)
+		pos_sharp.y = math.floor(self.pos.y)
+		pos_sharp.z = (144-pos_sharp.y)/144
+		if pos_sharp.z <= 0 then
+			pos_sharp.z = 0.01
+		end
+		
+		local idle_state = pinot_idle(self)
+		
+		if idle_state and math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1 then
+			pos_sharp.y = ((pos_sharp.x-self.diagonal_start_pos.x)*self.input.x*self.input.y)+self.diagonal_start_pos.y
+		end
+
+		if self.pos.x < 4 or self.pos.x > 156 or self.pos.y < 8 or self.pos.y > 144 then --going offscreen
+			if self.pos.x < 4 then 
+				self.pos.x = 4
+				if idle_state then
+					sprite.play_flipbook("#sprite", "pinot-walk-side")
+				end
+			elseif self.pos.x > 156 then
+				self.pos.x = 156
+				if idle_state then
+					sprite.play_flipbook("#sprite", "pinot-walk-side")
+				end
+			end
+			if self.pos.y < 8 then 
+				self.pos.y = 8
+				if idle_state then
+					sprite.play_flipbook("#sprite", "pinot-dive-down-1")
+				end
+			elseif self.pos.y > 144 then
+				self.pos.y = 144
+				if idle_state then
+					sprite.play_flipbook("#sprite", "pinot-walk-up")
+				end
+			end
+
+			if self.diving then
+				self.dive_length = self.dive_time
+				self.sliding = false --stop slide before slide has started
+				-- dive_end(self, "pinot-rise-"..vector_dir(self.dive_dir))
+			end
+			
+			pos_sharp.x = math.floor(self.pos.x)
+			pos_sharp.y = math.floor(self.pos.y)
+			pos_sharp.z = (144-pos_sharp.y)/144
+			if pos_sharp.z <= 0 then
+				pos_sharp.z = 0.01
+			end
+		end
+		
+
+		go.set_position(pos_sharp)
+	elseif self.wasmoving and pinot_idle(self) then --stop moving
+		-- print("stopped")
+		if self.tempdir.y > 0 then
+			sprite.play_flipbook("#sprite", "pinot-idle-up")
+		elseif self.tempdir.y < 0 then
+			sprite.play_flipbook("#sprite", "pinot-idle-down")
+		else
+			sprite.play_flipbook("#sprite", "pinot-idle-side")
+		end
+	end
+
+	if pinot_idle(self) and not ((self.dir.x == self.tempdir.x and self.dir.y == self.tempdir.y) and self.moving == self.wasmoving) and self.moving then --and not (math.abs(self.input.x) == math.abs(self.input.y) and self.wasmoving) -- start moving; set animation
+		set_animation(self)
+		-- print("updated anims")
+	end
+
+	if self.auto_target then --auto targeting
+		self.target_timer = self.target_timer + dt
+		if self.target_timer >= 0.1 then
+			self.target_timer = self.target_timer - 0.1
+
+			local prev_target = self.target
+			self.target = closest_enemy(self)
+
+			if prev_target ~= self.target and self.target then
+				msg.post(self.target.url, "glow", {glowing = true})
+				if prev_target then
+					msg.post(prev_target.url, "glow", {glowing = false})
+				end
+			end
+		end
+	end
+	
+	
+	-- if (simple_int(self.dir[self.axis]) ~= simple_int(self.tempdir[self.axis]) or self.moving ~= self.wasmoving) and self.moving then
+	-- 	set_animation(self)
+	-- 	print("a")
+	-- 	print(simple_int(self.dir[self.axis]), simple_int(self.tempdir[self.axis]))
+	-- 	if self.axis == "x" then
+	-- 		self.axis = "y"
+	-- 	else
+	-- 		self.axis = "x"
+	-- 	end
+	-- end
+
+	self.wasmoving = self.moving
+
+	-- self.input.x = 0
+	-- self.input.y = 0
+
+	self.tempdir = self.dir
+
+	self.moving = false
+end
+
+
+function on_input(self, action_id, action)
+	
+	local idle_state = pinot_idle(self)
+	
+	if action.pressed then --start moving in a given direction
+		if action_id == hash("shift") then
+			self.shifting = true
+		end
+		
+		if action_id == hash("up") then
+			self.input.y = self.input.y+1
+		elseif action_id == hash("down") then
+			self.input.y = self.input.y-1
+		elseif action_id == hash("left") then
+			self.input.x = self.input.x-1
+		elseif action_id == hash("right") then
+			self.input.x = self.input.x+1
+		end
+		check_input(self)
+
+		if (math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1) and not self.diving then
+			self.diagonal_start_pos = vmath.vector3(math.floor(self.pos.x), math.floor(self.pos.y), self.pos.z)
+		end 
+	elseif action.released then --stop moving in a given direction
+		if action_id == hash("shift") then
+			self.shifting = false
+		end
+		
+		if action_id == hash("up") then
+			self.input.y = self.input.y-1
+		elseif action_id == hash("down") then
+			self.input.y = self.input.y+1
+		elseif action_id == hash("left") then
+			self.input.x = self.input.x+1
+		elseif action_id == hash("right") then
+			self.input.x = self.input.x-1
+		end
+		check_input(self)
+
+		if (math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1) and not self.diving then
+			self.diagonal_start_pos = vmath.vector3(math.floor(self.pos.x), math.floor(self.pos.y), self.pos.z)
+		end 
+	end
+	
+	if action.pressed and idle_state and action_id == hash("dive") then --dive start
+		self.diving = true
+		idle_state = pinot_idle(self)
+		if idle_state then
+			print("SOMETHING HAS GONE VERY WRONG")
+		end
+		if self.charms.slide then
+			self.sliding = true
+			self.dive_length = 2
+			self.slide_time = 0
+			self.slide_speed_diff = 0
+			self.slide_frames = 16
+		else
+			self.dive_length = 0.5
+		end
+		self.extended_dive = false
+		self.dive_dir = self.dir
+		local dive_dir_txt = vector_dir(self.dive_dir)
+		self.dive_time = 0 
+
+		if self.dive_dir.x < 0 then
+			sprite.set_hflip("#sprite", true)
+		elseif self.dive_dir.x > 0 then
+			sprite.set_hflip("#sprite", false)
+		end
+		dive_end(self, "pinot-dive-"..dive_dir_txt)
+	elseif self.sliding and action.released and action_id == hash("dive") then --slide stop
+		self.sliding = false -- stop slide after slide has started
+		self.slide_time = self.dive_time-0.1875
+		if self.slide_time < 0 then
+			self.slide_time = 0
+		end
+		self.slide_speed_diff = (self.slide_cont_constant*2)*self.slide_time
+		-- self.dive_length = 0.5
+		local new_length = self.slide_time + ((self.dive_speed-self.slide_speed_diff)/(self.slide_stop_constant*2))
+		self.dive_length = 0.1875+new_length
+		-- print(self.slide_time, self.slide_speed_diff)
+		-- print(new_length)
+	end
+
+	normalize_input(self)
+
+	if pinot_idle(self) then
+		if action.pressed and action_id == hash("hit") then --hit --stab
+			local dir, angle
+			
+			if self.shifting then
+				angle = get_angle(self.pos, self.target.pos)
+			else
+				angle = get_angle(vmath.vector3(0,0,0), self.dir)
+			end
+
+			dir = angle_dir(angle, 4)
+			
+			print(angle)
+			print(dir)
+			if #dir < 2 then
+				attack(self, dir)
+			end
+		end
+
+		if action.pressed and action_id == hash("click") then --targeted hit
+			local angle = get_angle(self.pos, vmath.vector3(action.x, action.y, 0))
+			local dir = angle_dir(angle, 4)
+			print(angle)
+			print(dir)
+			if #dir < 2 then
+				attack(self, dir)
+			end
+		end
+	end
+
+	if action.pressed and action_id == hash("pause") then --pause
+		if self.paused then
+			msg.post("main:/pinot#player", "set_time_step", {factor = 1, mode = 0})
+			print("b")
+		else
+			msg.post("main:/pinot#player", "set_time_step", {factor = 0, mode = 0})
+			print("a")
+		end
+	end
+
+	if action.pressed and action_id == hash("debugL") then --debug left alt
+		self.marked_pos = self.pos
+		print("position marked at ("..math.floor(self.marked_pos.x)..", "..math.floor(self.marked_pos.y)..")")
+		print("[subpixel position: "..self.marked_pos.x..", "..self.marked_pos.y.." ]")
+		print("------")
+	end
+
+	if action.pressed and action_id == hash("debugR") then --debug right alt
+		local pos_diff = self.pos-self.marked_pos
+		pos_diff.z = 0
+		local diff_magnitude = math.abs(vmath.length(pos_diff))
+		print("position difference: "..math.floor(pos_diff.x)..", "..math.floor(pos_diff.y))
+		print("[ subpixel pos diff: "..pos_diff.x..", "..pos_diff.y.." ]")
+
+		if diff_magnitude == 34.375 then
+			print("100% accurate")
+		elseif round_decimals(diff_magnitude, 1) == 34.4 then
+			local accurate = true
+			local precision = 3
+			while accurate do
+				local rounded_pos = round_decimals(diff_magnitude, precision)
+				print("["..precision.." rounded distance: "..string.format("%."..precision.."f", rounded_pos).."]")
+				if rounded_pos ~= 34.375 then
+					print("accurate to "..(precision-1).." places")
+					accurate = false
+				end 
+				precision = precision + 1
+			end
+		else
+			print("pos diff inaccurate to dash length "..round_decimals(diff_magnitude, 2).." vs 34.375")
+		end
+		
+		print("[ real pos distance: "..diff_magnitude.." ]")
+				
+		print("------")
+	end
+
+	if action.pressed and action_id == hash("tab") then --debug tab
+		if not self.spear_rot then
+			self.spear_rot = 0
+		end
+		self.spear_rot = self.spear_rot + 90
+		
+		-- go.set_rotation(vmath.euler_to_quat(0,0,self.spear_rot), "/spear") --in-player spear
+		-- sprite.play_flipbook("/spear#sprite-spear", "spear-attack")
+
+		local props = {color = self.spear_color}
+		local id = factory.create("#spear-factory", vmath.vector3(50, 50, 0.5), vmath.euler_to_quat(0,0,self.spear_rot), props) --spear object
+		msg.post(".", "add_url", {hash = msg.url(nil, id, nil), type = "spear"})
+		
+		sprite.play_flipbook("#sprite", "pinot-lunge-side")
+	end
+end
