@@ -66,3 +66,11 @@ mouse_trigger {
   input: MOUSE_BUTTON_1
   action: "click"
 }
+gamepad_trigger {
+  input: GAMEPAD_RSHOULDER
+  action: "tab"
+}
+gamepad_trigger {
+  input: GAMEPAD_RPAD_LEFT
+  action: "tab"
+}

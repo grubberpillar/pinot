@@ -1,13 +1,16 @@
 go.property("color", vmath.vector3())
+go.property("hflip", false)
 go.property("palette_material", resource.material("/main/effects/3color.material"))
 
 function init(self)
 	go.set(msg.url("#sprite"), "material", self.palette_material)
 	go.set(msg.url("#sprite"), "color_id", vmath.vector4(self.color.x, self.color.y, self.color.z, 0))
+	sprite.set_hflip(msg.url("#sprite"), self.hflip)
 	
-	if self.color then
-		print(self.color)
-		print(self.color.x)
+	if self.hflip then
+		print("yes")
+	else
+		print("no")
 	end
 end
 

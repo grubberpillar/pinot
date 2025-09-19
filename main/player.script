@@ -160,28 +160,33 @@ end
 
 local function attack(self, dir)
 	self.attacking = true
-	sprite.play_flipbook("/spear#sprite-spear", "spear-attack")
 	local dir_convert = {n = "up", e = "side", s = "down", w = "side"}
+	local spear_rot, spear_pos
+	local spear_hflip = false 
 	
 	if dir == "w" then
-		go.set("/spear", "position", vmath.vector3(-15, -4, 0.001))
-		go.set_rotation(vmath.euler_to_quat(0,0,0), "/spear")
+		spear_hflip = true
+		spear_rot = vmath.euler_to_quat(0,0,0)
+		spear_pos = vmath.vector3(-15, -4, 0)
 		sprite.set_hflip("#sprite", true)
-		sprite.set_hflip("/spear#sprite-spear", true)
 	else
 		sprite.set_hflip("#sprite", false)
-		sprite.set_hflip("/spear#sprite-spear", false)
 		if dir	 == "n" then
-			go.set("/spear", "position", vmath.vector3(0, 15, 0.001))
-			go.set_rotation(vmath.euler_to_quat(0,0,90), "/spear")
+			spear_rot = vmath.euler_to_quat(0,0,90)
+			spear_pos = vmath.vector3(0, 15, 0)
 		elseif dir == "s" then
-			go.set("/spear", "position", vmath.vector3(0, -15, 0.001))
-			go.set_rotation(vmath.euler_to_quat(0,0,-90), "/spear")
+			spear_rot = vmath.euler_to_quat(0,0,-90)
+			spear_pos = vmath.vector3(0, -15, 0)
 		elseif dir == "e" then
-			go.set("/spear", "position", vmath.vector3(15, -4, 0.001))
-			go.set_rotation(vmath.euler_to_quat(0,0,0), "/spear")
+			spear_rot = vmath.euler_to_quat(0,0,0)
+			spear_pos = vmath.vector3(15, -4, 0)
 		end
 	end
+	
+	local props = {color = self.spear_color, hflip = spear_hflip}
+	local id = factory.create("#spear-factory", (self.pos_sharp + spear_pos), spear_rot, props) --spear object
+	msg.post(".", "add_url", {hash = msg.url(nil, id, nil), type = "spear"})
+	
 	sprite.play_flipbook("#sprite", "pinot-lunge-"..dir_convert[dir], function()
 		self.attacking = false
 		if vmath.length(self.input) ~= 0 then
@@ -394,19 +399,19 @@ function update(self, dt)
 		elseif not self.attacking then
 			self.pos = self.pos + self.dir * self.speed* dt
 		end
-		local pos_sharp = vmath.vector3(0,0,1)
+		self.pos_sharp = vmath.vector3(0,0,1)
 		
-		pos_sharp.x = math.floor(self.pos.x)
-		pos_sharp.y = math.floor(self.pos.y)
-		pos_sharp.z = (144-pos_sharp.y)/144
-		if pos_sharp.z <= 0 then
-			pos_sharp.z = 0.01
+		self.pos_sharp.x = math.floor(self.pos.x)
+		self.pos_sharp.y = math.floor(self.pos.y)
+		self.pos_sharp.z = (144-self.pos_sharp.y)/144
+		if self.pos_sharp.z <= 0 then
+			self.pos_sharp.z = 0.01
 		end
 		
 		local idle_state = pinot_idle(self)
 		
 		if idle_state and math.abs(self.input.x) == 1 and math.abs(self.input.y) == 1 then
-			pos_sharp.y = ((pos_sharp.x-self.diagonal_start_pos.x)*self.input.x*self.input.y)+self.diagonal_start_pos.y
+			self.pos_sharp.y = ((self.pos_sharp.x-self.diagonal_start_pos.x)*self.input.x*self.input.y)+self.diagonal_start_pos.y
 		end
 
 		if self.pos.x < 4 or self.pos.x > 156 or self.pos.y < 8 or self.pos.y > 144 then --going offscreen
@@ -439,16 +444,16 @@ function update(self, dt)
 				-- dive_end(self, "pinot-rise-"..vector_dir(self.dive_dir))
 			end
 			
-			pos_sharp.x = math.floor(self.pos.x)
-			pos_sharp.y = math.floor(self.pos.y)
-			pos_sharp.z = (144-pos_sharp.y)/144
-			if pos_sharp.z <= 0 then
-				pos_sharp.z = 0.01
+			self.pos_sharp.x = math.floor(self.pos.x)
+			self.pos_sharp.y = math.floor(self.pos.y)
+			self.pos_sharp.z = (144-self.pos_sharp.y)/144
+			if self.pos_sharp.z <= 0 then
+				self.pos_sharp.z = 0.01
 			end
 		end
 		
 
-		go.set_position(pos_sharp)
+		go.set_position(self.pos_sharp)
 	elseif self.wasmoving and pinot_idle(self) then --stop moving
 		-- print("stopped")
 		if self.tempdir.y > 0 then
@@ -677,8 +682,8 @@ function on_input(self, action_id, action)
 		-- go.set_rotation(vmath.euler_to_quat(0,0,self.spear_rot), "/spear") --in-player spear
 		-- sprite.play_flipbook("/spear#sprite-spear", "spear-attack")
 
-		local props = {color = self.spear_color}
-		local id = factory.create("#spear-factory", vmath.vector3(50, 50, 0.5), vmath.euler_to_quat(0,0,self.spear_rot), props) --spear object
+		local props = {color = self.spear_color, hflip = false}
+		local id = factory.create("#spear-factory", (self.pos + vmath.vector3(14, -4, 0)), vmath.euler_to_quat(0,0,self.spear_rot), props) --spear object
 		msg.post(".", "add_url", {hash = msg.url(nil, id, nil), type = "spear"})
 		
 		sprite.play_flipbook("#sprite", "pinot-lunge-side")

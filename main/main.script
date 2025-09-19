@@ -25,7 +25,7 @@ function pprint(tbl, indent) --imported method
 end
 
 function init(self)
-	self.instances = {}
+	self.obj_instances = {}
 	
 	self.scale = 5
 	msg.post("@render:", "use_fixed_fit_projection", { near = -1, far = 1 })
@@ -46,31 +46,31 @@ end
 
 function on_message(self, message_id, message)
 	if message_id == hash("add_url") then
-		table.insert(self.instances, {message.hash, message.type})
+		table.insert(self.obj_instances, {message.hash, message.type})
 	elseif message_id == hash("remove_url") then
-		for i, k in ipairs(self.instances) do
+		for i, k in ipairs(self.obj_instances) do
 			if k[1].path == message.hash.path then
-				table.remove(self.instances, i)
+				table.remove(self.obj_instances, i)
 				break
 			end
-			if i == #self.instances then
+			if i == #self.obj_instances then
 				print("nothing removed (" .. tostring(message.hash) .. ")")
 			end
 		end
 	elseif message_id == hash("purge_instances") then
 		local spared_instances = {}
-		while #self.instances > #spared_instances do
-			for i, k in ipairs(self.instances) do
+		while #self.obj_instances > #spared_instances do
+			for i, k in ipairs(self.obj_instances) do
 				if not (message.spare and message.spare == k[2]) then
 					msg.post(k[1], "kill")
-					table.remove(self.instances, i)
+					table.remove(self.obj_instances, i)
 				else
-					table.insert(spared_instances, table.remove(self.instances, i))
+					table.insert(spared_instances, table.remove(self.obj_instances, i))
 				end
 			end
 		end
 		for i, k in ipairs(spared_instances) do
-			table.insert(self.instances, spared_instances[i])
+			table.insert(self.obj_instances, spared_instances[i])
 		end
 	end
 end
